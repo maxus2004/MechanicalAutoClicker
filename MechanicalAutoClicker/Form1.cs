@@ -347,12 +347,12 @@ namespace MechanicalAutoClicker
 
                     if (taps.TapList[i].Drag)
                     {
-                        Console.WriteLine("drag" + i);
+                        Console.WriteLine("drag" + i + "/" + taps.TapList.Count);
                         MoveAndDrag(taps.TapList[i].DragPoints, taps.TapList[i].DragV, prevX, prevY, startTime + t);
                     }
                     else
                     {
-                        Console.WriteLine("tap" + i);
+                        Console.WriteLine("tap" + i+"/"+taps.TapList.Count);
                         MoveAndTap(x, y, prevX, prevY, startTime + t);
                     }
 
