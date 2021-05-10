@@ -7,11 +7,11 @@ namespace MechanicalAutoClicker
 {
     class Taps
     {
-        public double startTime = 0;
-        public List<Tap> taps = new List<Tap>();
-        public Taps(string file, double dragSpeedMult, double scale)
+        public double StartTime;
+        public List<Tap> TapList = new List<Tap>();
+        public Taps(string file, double dragSpeedMultiplier, double scale)
         {
-            double SliderMultiplier = 1, baseSliderSpeed = 100;
+            double sliderMultiplier = 1, baseSliderSpeed = 100;
 
             CultureInfo format = new CultureInfo("en-US");
 
@@ -21,8 +21,8 @@ namespace MechanicalAutoClicker
 
             string block = "";
 
-            taps.Add(new Tap(256 * scale, 60 - 192 * scale, 0));
-            taps.Add(new Tap(650 * scale, 60 - 400 * scale, 0));
+            TapList.Add(new Tap(256 * scale, 60 - 192 * scale, 0));
+            TapList.Add(new Tap(650 * scale, 60 - 400 * scale, 0));
 
             foreach (string line in lines)
             {
@@ -36,7 +36,7 @@ namespace MechanicalAutoClicker
                     string[] words = line.Split(':');
                     if (words[0] == "SliderMultiplier")
                     {
-                        SliderMultiplier = double.Parse(words[1], format) * 100;
+                        sliderMultiplier = double.Parse(words[1], format) * 100;
                     }
                 }
                 if (block == "TimingPoints")
@@ -49,7 +49,7 @@ namespace MechanicalAutoClicker
                     {
                         double beatLength = double.Parse(words[1], format);
                         double beatPerSecond = 1000.0 / beatLength;
-                        sliderSpeed = SliderMultiplier * beatPerSecond;
+                        sliderSpeed = sliderMultiplier * beatPerSecond;
                         baseSliderSpeed = sliderSpeed;
                     }
                     else
@@ -71,7 +71,7 @@ namespace MechanicalAutoClicker
                     if ((type & (1 << 0)) != 0)
                     {
                         //hit circle
-                        taps.Add(new Tap(x * scale, 60 - y * scale, t));
+                        TapList.Add(new Tap(x * scale, 60 - y * scale, t));
                     }
                     else if ((type & (1 << 1)) != 0)
                     {
@@ -91,7 +91,7 @@ namespace MechanicalAutoClicker
                         }
 
                         List<double[]> dragPoints = new List<double[]>();
-                        double dragV = sliderSpeed * scale * dragSpeedMult;
+                        double dragV = sliderSpeed * scale * dragSpeedMultiplier;
                         string[] pointsStr = words[5].Split('|');
                         double setS = double.Parse(words[7], format);
                         int repeats = int.Parse(words[6], format);
@@ -127,8 +127,8 @@ namespace MechanicalAutoClicker
                             }
                         }
 
-                        double distMult = s / setS;
-                        taps.Add(new Tap(dragPoints.ToArray(), dragV * distMult, t));
+                        double distMul = s / setS;
+                        TapList.Add(new Tap(dragPoints.ToArray(), dragV * distMul, t));
                     }
                     else if ((type & (1 << 3)) != 0)
                     {
@@ -137,8 +137,8 @@ namespace MechanicalAutoClicker
                         double length = endTime - t;
 
                         //center
-                        double sircleX = 256 * scale;
-                        double sircleY = 240 * scale;
+                        double circleX = 256 * scale;
+                        double circleY = 240 * scale;
                         int r = 5;
 
                         List<double[]> dragPoints = new List<double[]>();
@@ -147,58 +147,58 @@ namespace MechanicalAutoClicker
 
                         while (true)
                         {
-                            dragPoints.Add(new double[] { sircleX - r, sircleY - r });
+                            dragPoints.Add(new [] { circleX - r, circleY - r });
                             time += Form1.DistToTime(r * 2);
                             if (time + Form1.DistToTime(r * 2) > length) break;
-                            dragPoints.Add(new double[] { sircleX - r, sircleY + r });
+                            dragPoints.Add(new [] { circleX - r, circleY + r });
                             time += Form1.DistToTime(r * 2);
                             if (time + Form1.DistToTime(r * 2) > length) break;
-                            dragPoints.Add(new double[] { sircleX + r, sircleY + r });
+                            dragPoints.Add(new [] { circleX + r, circleY + r });
                             time += Form1.DistToTime(r * 2);
                             if (time + Form1.DistToTime(r * 2) > length) break;
-                            dragPoints.Add(new double[] { sircleX + r, sircleY - r });
+                            dragPoints.Add(new [] { circleX + r, circleY - r });
                             time += Form1.DistToTime(r * 2);
                             if (time + Form1.DistToTime(r * 2) > length) break;
                         }
 
-                        taps.Add(new Tap(dragPoints.ToArray(), 450, t));
+                        TapList.Add(new Tap(dragPoints.ToArray(), 450, t));
                     }
                 }
             }
-            startTime = taps[2].t - 4;
-            taps[1].t = taps[2].t - 2.22;
-            taps[0].t = taps[2].t - 3.5;
+            StartTime = TapList[2].T - 4;
+            TapList[1].T = TapList[2].T - 2.22;
+            TapList[0].T = TapList[2].T - 3.5;
         }
     }
 
     class Tap
     {
-        public bool drag;
-        public double x, y;
-        public double endX, endY;
-        public double t;
-        public double dragV;
-        public double[][] dragPoints;
+        public bool Drag;
+        public double X, Y;
+        public double EndX, EndY;
+        public double T;
+        public double DragV;
+        public double[][] DragPoints;
 
         public Tap(double x, double y, double t)
         {
-            this.x = x;
-            this.y = y;
-            this.t = t;
-            this.endX = x;
-            this.endY = y;
-            drag = false;
+            this.X = x;
+            this.Y = y;
+            this.T = t;
+            this.EndX = x;
+            this.EndY = y;
+            Drag = false;
         }
         public Tap(double[][] dragPoints, double dragV, double t)
         {
-            this.dragPoints = dragPoints;
-            x = dragPoints[0][0];
-            y = dragPoints[0][1];
-            endX = dragPoints[dragPoints.Length - 1][0];
-            endY = dragPoints[dragPoints.Length - 1][1];
-            this.t = t;
-            this.dragV = dragV;
-            drag = true;
+            this.DragPoints = dragPoints;
+            X = dragPoints[0][0];
+            Y = dragPoints[0][1];
+            EndX = dragPoints[dragPoints.Length - 1][0];
+            EndY = dragPoints[dragPoints.Length - 1][1];
+            this.T = t;
+            this.DragV = dragV;
+            Drag = true;
         }
     }
 }

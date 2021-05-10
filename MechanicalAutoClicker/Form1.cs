@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.IO.Ports;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace MechanicalAutoClicker
@@ -18,7 +11,7 @@ namespace MechanicalAutoClicker
     {
         static CultureInfo format = new CultureInfo("en-US");
 
-        public static Form1 form1;
+        public static Form1 OpenedForm;
 
         private Taps taps;
 
@@ -29,17 +22,17 @@ namespace MechanicalAutoClicker
             TouchOnly
         };
 
-        bool RandomTapping = false;
-        bool AutoTapping = false;
-        private bool MoveImmediately = true;
+        bool randomTapping = false;
+        bool autoTapping = false;
+        private bool moveImmediately = true;
 
-        private Modes Mode = Modes.TouchOnly;
-        private double PrevX = 0, PrevY = 0;
-        private double X = 0, Y = 0;
-        public int xOff = 0, yOff = 0;
+        private Modes mode = Modes.TouchOnly;
+        public double PrevX = 0, PrevY = 0;
+        public double X = 0, Y = 0;
+        private int xOff = 0, yOff = 0;
 
         private static double phoneXSize = 135, phoneYSize = 60;
-        private static int MoveSpeed = 450, moveAcc = 8000;
+        private static int moveSpeed = 450, moveAcc = 8000;
         private static double tapDelay = 0, tapTime = 0.075, printerDelay = 0.05;
 
         SerialPort PrinterPort;
@@ -47,7 +40,7 @@ namespace MechanicalAutoClicker
 
         public Form1()
         {
-            form1 = this;
+            OpenedForm = this;
             InitializeComponent();
             DrawPanel.MouseDown += Press;
             DrawPanel.MouseUp += Release;
@@ -62,26 +55,26 @@ namespace MechanicalAutoClicker
             PrinterPort.WriteLine("M204 T" + moveAcc);
             PrinterPort.WriteLine("M205 B0 X0 Y0");
             PrinterPort.WriteLine("M17 X Y Z");
-            PrinterPort.WriteLine("G0 F" + (MoveSpeed * 60));
+            PrinterPort.WriteLine("G0 F" + (moveSpeed * 60));
             new Thread(() =>
             {
                 while (PrinterPort.IsOpen)
                 {
-                    if (Mode == Modes.Normal && !AutoTapping)
+                    if (mode == Modes.Normal && !autoTapping)
                         MovePrinter();
                     else Thread.Sleep(50);
                 }
             }).Start();
         }
 
-        public static double getTime()
+        public static double GetTime()
         {
             return Environment.TickCount / 1000.0;
         }
 
         public static void SleepUntil(double time)
         {
-            int delay = (int)((time - getTime()) * 1000);
+            int delay = (int)((time - GetTime()) * 1000);
             if (delay < 0)
             {
                 delay = 0;
@@ -102,8 +95,10 @@ namespace MechanicalAutoClicker
         }
         public static void AccurateSleep(double time)
         {
-            double t = getTime() + time;
-            while (getTime() < t) ;
+            double t = GetTime() + time;
+            while (GetTime() < t)
+            {
+            }
         }
 
         public static double DistToTime(double s, double v)
@@ -131,7 +126,7 @@ namespace MechanicalAutoClicker
         }
         public static double DistToTime(double s)
         {
-            return DistToTime(s, MoveSpeed);
+            return DistToTime(s, moveSpeed);
         }
 
         public void Stop(object sender, EventArgs e)
@@ -148,9 +143,9 @@ namespace MechanicalAutoClicker
             MoveTo(x, y);
             Sleep(time + printerDelay - tapDelay);
             StylusPort.Write("t");
-            if (RandomTapping)
+            if (randomTapping)
             {
-                Sleep(tapTime);
+                AccurateSleep(tapTime);
                 MoveAndTap(random.NextDouble() * phoneXSize, random.NextDouble() * phoneYSize, x, y);
             }
         }
@@ -171,13 +166,12 @@ namespace MechanicalAutoClicker
             {
                 double x = dragPoints[0][0];
                 double y = dragPoints[0][1];
-                double dist = Math.Sqrt((x - prevX) * (x - prevX) + (y - prevY) * (y - prevY));
                 time = t - tapDelay;
                 MoveTo(x, y);
                 SleepUntil(time);
             }
             StylusPort.Write("p");
-            Sleep(tapDelay);
+            AccurateSleep(tapDelay);
             for (int i = 1; i < dragPoints.Length; i++)
             {
                 double x = dragPoints[i - 1][0];
@@ -189,19 +183,18 @@ namespace MechanicalAutoClicker
                 MoveTo(endX, endY, dragV);
                 SleepUntil(time);
             }
-            Sleep(printerDelay);
+            AccurateSleep(printerDelay);
             StylusPort.Write("r");
         }
 
         public void MoveTo(double x, double y)
         {
-            MoveTo(x, y, MoveSpeed);
+            MoveTo(x, y, moveSpeed);
         }
         public void MoveTo(double x, double y, double v)
         {
             x += xOff;
             y += yOff;
-            CultureInfo format = new CultureInfo("en-US");
             PrinterPort.WriteLine($"G0 X{x.ToString("#.##", format)} Y{y.ToString("#.##", format)} F{(int)(v * 60)}");
             X = x;
             Y = y;
@@ -212,7 +205,7 @@ namespace MechanicalAutoClicker
             PrevY = Y;
             Y = phoneYSize - e.X * (phoneYSize / DrawPanel.Width);
             X = phoneXSize - e.Y * (phoneXSize / DrawPanel.Height);
-            if (Mode == Modes.Normal)
+            if (mode == Modes.Normal)
             {
                 StylusPort.Write("p");
             }
@@ -222,16 +215,16 @@ namespace MechanicalAutoClicker
             }
         }
 
-        private void AutoTouchCkeckBox_CheckedChanged(object sender, EventArgs e)
+        private void AutoTouchCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            AutoTapping = AutoTouchCkeckBox.Checked;
+            autoTapping = AutoTouchCheckBox.Checked;
 
-            if (AutoTapping)
+            if (autoTapping)
             {
                 if (taps is null)
                 {
-                    AutoTapping = false;
-                    AutoTouchCkeckBox.Checked = false;
+                    autoTapping = false;
+                    AutoTouchCheckBox.Checked = false;
                     return;
                 }
                 StartAutoTapping();
@@ -253,30 +246,32 @@ namespace MechanicalAutoClicker
 
         private void MoveImmediatelyCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            MoveImmediately = MoveImmediatelyCheckBox.Checked;
+            moveImmediately = MoveImmediatelyCheckBox.Checked;
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
-            MoveSpeed = int.Parse(textBox1.Text, format);
-            PrinterPort.WriteLine("G0 F" + (MoveSpeed * 60));
+            moveSpeed = int.Parse(textBox1.Text, format);
+            PrinterPort.WriteLine("G0 F" + (moveSpeed * 60));
         }
 
         private void LoadTapsBtn_Click(object sender, EventArgs e)
         {
-            OpenFileDialog dialog = new OpenFileDialog();
-            dialog.RestoreDirectory = true;
+            OpenFileDialog dialog = new OpenFileDialog { RestoreDirectory = true };
+
             if (dialog.ShowDialog() == DialogResult.OK)
             {
                 string file = dialog.FileName;
-                FileLabel.Text = file.Substring(file.LastIndexOfAny(new char[] { '\\', '/' }));
-                taps = new Taps(file, double.Parse(SliderSpeedTextBox.Text, format), double.Parse(ScaleTextBox.Text, format));
+                FileLabel.Text = file.Substring(file.LastIndexOfAny(new[] { '\\', '/' }));
+                taps = new Taps(file,
+                    double.Parse(SliderSpeedTextBox.Text, format),
+                    double.Parse(ScaleTextBox.Text, format));
             }
         }
 
         public void SetPos(object sender, MouseEventArgs e)
         {
-            if (Mode == Modes.TouchOnly) return;
+            if (mode == Modes.TouchOnly) return;
 
             Y = phoneYSize - e.X * (phoneYSize / DrawPanel.Width);
             X = phoneXSize - e.Y * (phoneXSize / DrawPanel.Height);
@@ -284,7 +279,7 @@ namespace MechanicalAutoClicker
 
         private void checkBox1_CheckedChanged_1(object sender, EventArgs e)
         {
-            RandomTapping = RandomTapCheckBox.Checked;
+            randomTapping = RandomTapCheckBox.Checked;
         }
 
         void MovePrinter()
@@ -306,35 +301,28 @@ namespace MechanicalAutoClicker
 
         private void checkBox1_CheckedChanged(object sender, EventArgs e)
         {
-            if (ModeCheckBox.Checked)
-            {
-                Mode = Modes.TouchOnly;
-            }
-            else
-            {
-                Mode = Modes.Normal;
-            }
+            mode = ModeCheckBox.Checked ? Modes.TouchOnly : Modes.Normal;
         }
 
         void StartAutoTapping()
         {
             new Thread(() =>
             {
-                double startTime = getTime() - taps.startTime;
-                for (int i = 0; i < taps.taps.Count; i++)
+                double startTime = GetTime() - taps.StartTime;
+                for (int i = 0; i < taps.TapList.Count; i++)
                 {
-                    if (!AutoTapping) break;
+                    if (!autoTapping) break;
 
-                    double x = taps.taps[i].x;
-                    double y = taps.taps[i].y;
-                    double t = taps.taps[i].t;
+                    double x = taps.TapList[i].X;
+                    double y = taps.TapList[i].Y;
+                    double t = taps.TapList[i].T;
 
 
                     double prevX, prevY;
                     if (i > 0)
                     {
-                        prevX = taps.taps[i - 1].endX;
-                        prevY = taps.taps[i - 1].endY;
+                        prevX = taps.TapList[i - 1].EndX;
+                        prevY = taps.TapList[i - 1].EndY;
                     }
                     else
                     {
@@ -342,11 +330,11 @@ namespace MechanicalAutoClicker
                         prevY = Y;
                     }
 
-                    if (!MoveImmediately)
+                    if (!moveImmediately)
                     {
                         double dist = Math.Sqrt((x - prevX) * (x - prevX) + (y - prevY) * (y - prevY));
                         double moveTime = DistToTime(dist) + tapDelay + printerDelay;
-                        double time = getTime() - startTime;
+                        double time = GetTime() - startTime;
                         int delayTime = (int)((t - time - moveTime) * 1000);
                         if (delayTime < 0)
                         {
@@ -357,10 +345,10 @@ namespace MechanicalAutoClicker
                         Thread.Sleep(delayTime);
                     }
 
-                    if (taps.taps[i].drag)
+                    if (taps.TapList[i].Drag)
                     {
                         Console.WriteLine("drag" + i);
-                        MoveAndDrag(taps.taps[i].dragPoints, taps.taps[i].dragV, prevX, prevY, startTime + t);
+                        MoveAndDrag(taps.TapList[i].DragPoints, taps.TapList[i].DragV, prevX, prevY, startTime + t);
                     }
                     else
                     {

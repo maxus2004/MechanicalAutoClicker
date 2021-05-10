@@ -32,7 +32,7 @@ namespace MechanicalAutoClicker
             this.DrawPanel = new System.Windows.Forms.Panel();
             this.ModeCheckBox = new System.Windows.Forms.CheckBox();
             this.RandomTapCheckBox = new System.Windows.Forms.CheckBox();
-            this.AutoTouchCkeckBox = new System.Windows.Forms.CheckBox();
+            this.AutoTouchCheckBox = new System.Windows.Forms.CheckBox();
             this.LoadTapsBtn = new System.Windows.Forms.Button();
             this.FileLabel = new System.Windows.Forms.Label();
             this.SliderSpeedTextBox = new System.Windows.Forms.TextBox();
@@ -87,15 +87,15 @@ namespace MechanicalAutoClicker
             // 
             // AutoTouchCkeckBox
             // 
-            this.AutoTouchCkeckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.AutoTouchCkeckBox.AutoSize = true;
-            this.AutoTouchCkeckBox.Location = new System.Drawing.Point(292, 58);
-            this.AutoTouchCkeckBox.Name = "AutoTouchCkeckBox";
-            this.AutoTouchCkeckBox.Size = new System.Drawing.Size(82, 17);
-            this.AutoTouchCkeckBox.TabIndex = 3;
-            this.AutoTouchCkeckBox.Text = "Auto Touch";
-            this.AutoTouchCkeckBox.UseVisualStyleBackColor = true;
-            this.AutoTouchCkeckBox.CheckedChanged += new System.EventHandler(this.AutoTouchCkeckBox_CheckedChanged);
+            this.AutoTouchCheckBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.AutoTouchCheckBox.AutoSize = true;
+            this.AutoTouchCheckBox.Location = new System.Drawing.Point(292, 58);
+            this.AutoTouchCheckBox.Name = "AutoTouchCkeckBox";
+            this.AutoTouchCheckBox.Size = new System.Drawing.Size(82, 17);
+            this.AutoTouchCheckBox.TabIndex = 3;
+            this.AutoTouchCheckBox.Text = "Auto Touch";
+            this.AutoTouchCheckBox.UseVisualStyleBackColor = true;
+            this.AutoTouchCheckBox.CheckedChanged += new System.EventHandler(this.AutoTouchCheckBox_CheckedChanged);
             // 
             // LoadTapsBtn
             // 
@@ -247,7 +247,7 @@ namespace MechanicalAutoClicker
             this.Controls.Add(this.SliderSpeedTextBox);
             this.Controls.Add(this.FileLabel);
             this.Controls.Add(this.LoadTapsBtn);
-            this.Controls.Add(this.AutoTouchCkeckBox);
+            this.Controls.Add(this.AutoTouchCheckBox);
             this.Controls.Add(this.RandomTapCheckBox);
             this.Controls.Add(this.ModeCheckBox);
             this.Controls.Add(this.DrawPanel);
@@ -263,7 +263,7 @@ namespace MechanicalAutoClicker
         private System.Windows.Forms.Panel DrawPanel;
         private System.Windows.Forms.CheckBox ModeCheckBox;
         private System.Windows.Forms.CheckBox RandomTapCheckBox;
-        private System.Windows.Forms.CheckBox AutoTouchCkeckBox;
+        private System.Windows.Forms.CheckBox AutoTouchCheckBox;
         private System.Windows.Forms.Button LoadTapsBtn;
         private System.Windows.Forms.Label FileLabel;
         private System.Windows.Forms.TextBox SliderSpeedTextBox;
